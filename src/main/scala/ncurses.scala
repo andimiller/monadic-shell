@@ -1,6 +1,5 @@
 import scalanative.native
 
-
 @native.link("ncurses")
 @native.extern
 object ncurses {
@@ -11,7 +10,8 @@ object ncurses {
   def echo(): native.CInt = native.extern
   def noecho(): native.CInt = native.extern
   def keypad(w: WINDOW, v: native.CInt): native.CInt = native.extern
-  def wprintw(w: WINDOW, s: native.CString, args: native.CVararg*): Unit = native.extern
+  def wprintw(w: WINDOW, s: native.CString, args: native.CVararg*): Unit =
+    native.extern
   def printw(s: native.CString, args: native.CVararg*): Unit = native.extern
   def refresh(): Unit = native.extern
   def wgetch(w: WINDOW): native.CInt = native.extern

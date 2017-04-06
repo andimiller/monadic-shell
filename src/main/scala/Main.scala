@@ -35,20 +35,15 @@ object Main {
       println(input)
       runCommand(input)
     }
-
-
-
     /*
     val window = ncurses.initscr()
     ncurses.wprintw(window, c"hello world! %s", c"woo!")
     ncurses.refresh()
     ncurses.wgetch(window)
     ncurses.endwin()
-    */
+   */
   }
 
-  def forkit(command: List[String]) = {
-
-  }
+  def forkit(command: List[String]) = {}
 
 }
