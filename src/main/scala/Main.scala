@@ -1,5 +1,4 @@
 import scalanative.native._
-import scalanative.native
 
 object Main {
 
@@ -7,43 +6,50 @@ object Main {
     @inline def toC = toCString(s)
   }
 
-  implicit class UsefulCString(s: native.CString) {
-    @inline def toScala = native.fromCString(s)
+  implicit class UsefulCString(s: CString) {
+    @inline def toScala = fromCString(s)
   }
 
   import Fork._
 
-  def runCommand(commands: List[String]) = {
+  def runCommand(command: Array[CString]): CInt = {
     unistd.fork() match {
       case Parent(childpid) =>
-        println("waiting for children")
-        unistd.waitpid(-1, null, 0) // wait for all children
-        println("all children exited")
+        var result = stackalloc[CInt](1)
+        unistd.waitall(result)
+        println(!result)
+        !result
       case Child() =>
-        val (command :: args) = commands
-        val cargs = args.map(_.toC) :+ 0.cast[native.CString]
-        val returncode = unistd.execl(command.toC, args)
-        println(s"the child returned $returncode")
+        val arrayargs = stackalloc[CString](command.length).cast[Ptr[CString]]
+        for (idx <- 1 until command.length) {
+          !(arrayargs + (idx-1)) = command(idx).cast[Ptr[CChar]]
+        }
+        !(arrayargs + command.size) = 0.cast[CString]
+        unistd.execv(command(0), arrayargs)
+        -1
     }
   }
 
   def main(args: Array[String]): Unit = {
-    println("starting up")
     var exit = false
+    var lastReturnCode: Option[Int] = None
     while (!exit) {
-      val input = readline.readline("# ".toC).toScala.split(' ').toList
-      println(input)
-      runCommand(input)
+      val prompt = lastReturnCode match {
+        case None => "# "
+        case Some(x) if x==0 => Colours.GREEN + "# " + Colours.DEFAULT
+        case Some(x) if x!=0 => Colours.RED   + "# " + Colours.DEFAULT
+      }
+      val input = readline.readline(prompt.toC)
+      val splitInput = input.toScala.split(' ')
+      val returncode = splitInput match {
+        case x if x(0) == "exit" => sys.exit(0)
+        case _ =>
+          runCommand(splitInput.map(_.toC))
+      }
+      lastReturnCode = Some(returncode)
+      if (returncode==0) {
+        readline.add_history(input)
+      }
     }
-    /*
-    val window = ncurses.initscr()
-    ncurses.wprintw(window, c"hello world! %s", c"woo!")
-    ncurses.refresh()
-    ncurses.wgetch(window)
-    ncurses.endwin()
-   */
   }
-
-  def forkit(command: List[String]) = {}
-
 }
