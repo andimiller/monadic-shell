@@ -22,7 +22,7 @@ object Main {
       case Child() =>
         val arrayargs = stackalloc[CString](command.length).cast[Ptr[CString]]
         for (idx <- 1 until command.length) {
-          !(arrayargs + (idx-1)) = command(idx).cast[Ptr[CChar]]
+          !(arrayargs + (idx - 1)) = command(idx).cast[Ptr[CChar]]
         }
         !(arrayargs + command.size) = 0.cast[CString]
         unistd.execv(command(0), arrayargs)
@@ -36,8 +36,8 @@ object Main {
     while (!exit) {
       val prompt = lastReturnCode match {
         case None => "# "
-        case Some(x) if x==0 => Colours.GREEN + "# " + Colours.DEFAULT
-        case Some(x) if x!=0 => Colours.RED   + "# " + Colours.DEFAULT
+        case Some(x) if x == 0 => Colours.GREEN + "# " + Colours.DEFAULT
+        case Some(x) if x != 0 => Colours.RED + "# " + Colours.DEFAULT
       }
       val input = readline.readline(prompt.toC)
       val splitInput = input.toScala.split(' ')
@@ -47,7 +47,7 @@ object Main {
           runCommand(splitInput.map(_.toC))
       }
       lastReturnCode = Some(returncode)
-      if (returncode==0) {
+      if (returncode == 0) {
         readline.add_history(input)
       }
     }

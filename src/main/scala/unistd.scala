@@ -8,7 +8,5 @@ object unistd {
   def fork(): CInt = extern
   def getpid(): CInt = extern
   @name("wait") def waitall(stat: Ptr[CInt]): CInt = extern
-  def waitpid(pid: CInt,
-              stat: Ptr[CInt],
-              options: CInt) = extern
+  def waitpid(pid: CInt, stat: Ptr[CInt], options: CInt) = extern
 }
